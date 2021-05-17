@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import wooteco.subway.auth.dto.TokenRequest;
 import wooteco.subway.auth.dto.TokenResponse;
 import wooteco.subway.auth.infrastructure.JwtTokenProvider;
@@ -25,6 +26,8 @@ class AuthServiceTest {
     JwtTokenProvider jwtTokenProvider;
     @Mock
     MemberDao memberDao;
+    @Mock
+    PasswordEncoder passwordEncoder;
 
     @InjectMocks
     AuthService authService;
@@ -39,6 +42,7 @@ class AuthServiceTest {
         TokenRequest tokenRequest = new TokenRequest(email, password);
         when(memberDao.findByEmail(any())).thenReturn(Optional.of(new Member(email, password, 27)));
         when(jwtTokenProvider.createToken(any())).thenReturn(password);
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
 
         //when
         TokenResponse tokenResponse = authService.createToken(tokenRequest);

@@ -31,4 +31,8 @@ public class MemberRequest {
     public Member toMember() {
         return new Member(email, password, age);
     }
+
+    public Member toEncodedMember(String encodedPassword) {
+        return new Member(email, encodedPassword, age);
+    }
 }

@@ -1,6 +1,7 @@
 package wooteco.subway.member.application;
 
 import org.springframework.stereotype.Service;
+import wooteco.subway.auth.application.AuthService;
 import wooteco.subway.exception.member.NotRegisteredMemberException;
 import wooteco.subway.member.dao.MemberDao;
 import wooteco.subway.member.domain.Member;
@@ -10,13 +11,16 @@ import wooteco.subway.member.dto.MemberResponse;
 @Service
 public class MemberService {
     private final MemberDao memberDao;
+    private final AuthService authService;
 
-    public MemberService(MemberDao memberDao) {
+    public MemberService(MemberDao memberDao, AuthService authService) {
         this.memberDao = memberDao;
+        this.authService = authService;
     }
 
     public Long createMember(MemberRequest request) {
-        return memberDao.insert(request.toMember());
+        String encodedPassword = authService.encodePassword(request.getPassword());
+        return memberDao.insert(request.toEncodedMember(encodedPassword));
     }
 
     public MemberResponse findMember(Long id) {

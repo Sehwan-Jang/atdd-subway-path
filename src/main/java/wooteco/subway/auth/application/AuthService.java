@@ -1,5 +1,6 @@
 package wooteco.subway.auth.application;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import wooteco.subway.auth.dto.TokenRequest;
 import wooteco.subway.auth.dto.TokenResponse;
@@ -16,10 +17,12 @@ public class AuthService {
 
     private final JwtTokenProvider tokenProvider;
     private final MemberDao memberDao;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthService(JwtTokenProvider tokenProvider, MemberDao memberDao) {
+    public AuthService(JwtTokenProvider tokenProvider, MemberDao memberDao, PasswordEncoder passwordEncoder) {
         this.tokenProvider = tokenProvider;
         this.memberDao = memberDao;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public TokenResponse createToken(TokenRequest tokenRequest) {
@@ -33,7 +36,7 @@ public class AuthService {
         String email = tokenRequest.getEmail();
         String password = tokenRequest.getPassword();
         Member member = memberDao.findByEmail(email).orElseThrow(LoginFailEmailException::new);
-        if (!member.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, member.getPassword())) {
             throw new LoginWrongPasswordException();
         }
     }
@@ -51,5 +54,9 @@ public class AuthService {
         if (!tokenProvider.validateToken(token)) {
             throw new IllegalTokenException();
         }
+    }
+
+    public String encodePassword(String password) {
+        return passwordEncoder.encode(password);
     }
 }
